@@ -1,6 +1,7 @@
 import { ChevronRight, Tags, Wallet, type LucideIcon } from 'lucide-react'
 import { Link } from 'react-router'
 import { PageHeader } from '../../components/PageHeader'
+import { BackupSection } from '../backup/BackupSection'
 
 interface SettingsLink {
   to: string
@@ -32,6 +33,7 @@ export function SettingsPage() {
           </li>
         ))}
       </ul>
+      <BackupSection />
     </>
   )
 }
