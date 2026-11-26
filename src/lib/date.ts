@@ -104,6 +104,13 @@ export function formatMonth(value: MonthString): string {
   return `${MONTHS_LONG[m - 1]} ${y}`
 }
 
+/** Label header riwayat: "Hari ini", "Kemarin", atau `25 Nov 2026`. */
+export function relativeDayLabel(value: DateString, today: DateString = todayDateString()): string {
+  if (value === today) return 'Hari ini'
+  if (value === addDays(today, -1)) return 'Kemarin'
+  return formatDate(value)
+}
+
 /** Perbandingan string aman karena formatnya `YYYY-MM-DD` dengan nol di depan. */
 export function isDateInRange(value: DateString, start: DateString, end: DateString): boolean {
   return value >= start && value <= end

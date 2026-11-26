@@ -11,6 +11,7 @@ import {
   monthOf,
   monthRange,
   parseDateString,
+  relativeDayLabel,
   toDateString,
   todayDateString,
 } from './date'
@@ -97,6 +98,14 @@ describe('aritmetika tanggal dan bulan', () => {
     expect(monthRange('2026-11')).toEqual({ start: '2026-11-01', end: '2026-11-30' })
     expect(monthRange('2024-02')).toEqual({ start: '2024-02-01', end: '2024-02-29' })
     expect(monthRange('2026-02')).toEqual({ start: '2026-02-01', end: '2026-02-28' })
+  })
+
+  it('relativeDayLabel', () => {
+    expect(relativeDayLabel('2026-11-25', '2026-11-25')).toBe('Hari ini')
+    expect(relativeDayLabel('2026-11-24', '2026-11-25')).toBe('Kemarin')
+    expect(relativeDayLabel('2026-12-31', '2027-01-01')).toBe('Kemarin')
+    expect(relativeDayLabel('2026-11-23', '2026-11-25')).toBe('23 Nov 2026')
+    expect(relativeDayLabel('2026-11-26', '2026-11-25')).toBe('26 Nov 2026')
   })
 
   it('isDateInRange inklusif di kedua ujung', () => {
