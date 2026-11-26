@@ -40,7 +40,9 @@ describe('onboarding', () => {
     await user.click(within(sheet).getByRole('button', { name: 'Simpan' }))
     expect(screen.getByRole('button', { name: /Saldo awal MyBCA: Rp1\.500\.000/ })).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Mulai mencatat' }))
+    await user.click(screen.getByRole('button', { name: 'Lanjut' }))
+    expect(screen.getByText('Langkah 3 dari 3')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Lewati, mulai mencatat' }))
     await waitFor(() => expect(router.state.location.pathname).toBe('/'))
 
     const wallets = await db.wallets.orderBy('sort').toArray()

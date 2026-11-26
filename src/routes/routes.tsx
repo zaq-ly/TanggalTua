@@ -1,5 +1,6 @@
 import type { RouteObject } from 'react-router'
 import { BudgetPage } from '../features/budget/BudgetPage'
+import { PotFormPage } from '../features/budget/PotFormPage'
 import { CategoriesPage } from '../features/categories/CategoriesPage'
 import { CategoryFormPage } from '../features/categories/CategoryFormPage'
 import { HomePage } from '../features/home/HomePage'
@@ -21,6 +22,8 @@ export const routes: RouteObject[] = [
       { index: true, element: <HomePage /> },
       { path: 'riwayat', element: <HistoryPage /> },
       { path: 'anggaran', element: <BudgetPage /> },
+      { path: 'anggaran/pos/baru', element: <PotFormPage /> },
+      { path: 'anggaran/pos/:id', element: <PotFormPage /> },
       { path: 'statistik', element: <StatsPage /> },
       { path: 'pengaturan', element: <SettingsPage /> },
       { path: 'pengaturan/dompet', element: <WalletsPage /> },
