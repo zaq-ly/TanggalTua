@@ -1,13 +1,18 @@
 import { create } from 'zustand'
 
-interface AddSheetState {
+interface TransactionSheetState {
   isOpen: boolean
+  /** `null` untuk transaksi baru. */
+  editingId: string | null
   open: () => void
+  openEdit: (id: string) => void
   close: () => void
 }
 
-export const useAddSheet = create<AddSheetState>()((set) => ({
+export const useAddSheet = create<TransactionSheetState>()((set) => ({
   isOpen: false,
-  open: () => set({ isOpen: true }),
-  close: () => set({ isOpen: false }),
+  editingId: null,
+  open: () => set({ isOpen: true, editingId: null }),
+  openEdit: (id) => set({ isOpen: true, editingId: id }),
+  close: () => set({ isOpen: false, editingId: null }),
 }))
