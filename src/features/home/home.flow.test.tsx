@@ -116,7 +116,7 @@ describe('Beranda', () => {
     const router = renderAt('/')
     await user.click(await screen.findByRole('link', { name: /Tunai, saldo/ }))
     expect(router.state.location.pathname).toBe('/riwayat')
-    expect(await screen.findByRole('combobox', { name: 'Saring dompet' })).toHaveValue(tunai)
+    expect(await screen.findByRole('button', { name: 'Saring dompet: Tunai' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Rp22\.000/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Rp11\.000/ })).not.toBeInTheDocument()
   })

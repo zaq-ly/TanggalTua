@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { EmptyState } from '../../components/EmptyState'
+import { FilterButton } from '../../components/FilterButton'
 import { PageHeader } from '../../components/PageHeader'
 import { PeriodPicker } from '../../components/PeriodPicker'
 import { usePeriod } from '../../components/usePeriod'
@@ -13,14 +14,12 @@ import { inPeriod, periodRange } from '../../domain/period'
 import { byNewest, groupByDate, matchesFilter, type TransactionFilter } from '../../domain/transactions'
 import { relativeDayLabel } from '../../lib/date'
 import { formatRupiah } from '../../lib/money'
+import { FilterPickerSheet } from './FilterPickerSheet'
 import { TransactionRow } from './TransactionRow'
 import { useAddSheet } from './useAddSheet'
 
 /** Jumlah transaksi per muatan (keputusan pemilik: muat bertahap, tanpa virtualisasi). */
 export const HISTORY_PAGE_SIZE = 100
-
-const selectClass =
-  'min-h-11 w-full min-w-0 rounded-control border border-line bg-surface px-3 text-sm font-medium text-ink'
 
 export function HistoryPage() {
   const openEdit = useAddSheet((s) => s.openEdit)
@@ -40,6 +39,7 @@ export function HistoryPage() {
   const setVisibleCount = (update: (n: number) => number) =>
     setPaging((p) => ({ key: rangeKey, count: update(p.key === rangeKey ? p.count : HISTORY_PAGE_SIZE) }))
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const [picker, setPicker] = useState<'wallet' | 'category' | null>(null)
 
   const data = useLiveQuery(async () => {
     const [transactions, wallets, categories] = await Promise.all([
@@ -98,8 +98,12 @@ export function HistoryPage() {
     )
   }
 
-  const expenseCategories = data.categories.filter((c) => c.kind === 'expense')
-  const incomeCategories = data.categories.filter((c) => c.kind === 'income')
+  const selectedWallet = filter.walletId ? ctx.wallets.get(filter.walletId) : undefined
+  const selectedCategory = filter.categoryId ? ctx.categories.get(filter.categoryId) : undefined
+  const categoryGroups = [
+    { label: 'Pengeluaran', options: data.categories.filter((c) => c.kind === 'expense') },
+    { label: 'Pemasukan', options: data.categories.filter((c) => c.kind === 'income') },
+  ]
 
   return (
     <>
@@ -119,41 +123,18 @@ export function HistoryPage() {
           />
         </label>
         <div className="grid grid-cols-2 gap-2">
-          <select
-            aria-label="Saring dompet"
-            value={filter.walletId ?? ''}
-            onChange={(e) => changeFilter({ walletId: e.target.value || undefined })}
-            className={selectClass}
-          >
-            <option value="">Semua dompet</option>
-            {data.wallets.map((w) => (
-              <option key={w.id} value={w.id}>
-                {w.archived ? `${w.name} (diarsipkan)` : w.name}
-              </option>
-            ))}
-          </select>
-          <select
-            aria-label="Saring kategori"
-            value={filter.categoryId ?? ''}
-            onChange={(e) => changeFilter({ categoryId: e.target.value || undefined })}
-            className={selectClass}
-          >
-            <option value="">Semua kategori</option>
-            <optgroup label="Pengeluaran">
-              {expenseCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.archived ? `${c.name} (diarsipkan)` : c.name}
-                </option>
-              ))}
-            </optgroup>
-            <optgroup label="Pemasukan">
-              {incomeCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.archived ? `${c.name} (diarsipkan)` : c.name}
-                </option>
-              ))}
-            </optgroup>
-          </select>
+          <FilterButton
+            label="Saring dompet"
+            valueLabel={selectedWallet?.name ?? 'Semua dompet'}
+            entity={selectedWallet}
+            onClick={() => setPicker('wallet')}
+          />
+          <FilterButton
+            label="Saring kategori"
+            valueLabel={selectedCategory?.name ?? 'Semua kategori'}
+            entity={selectedCategory}
+            onClick={() => setPicker('category')}
+          />
         </div>
         {isFiltering && (
           <div className="flex items-center justify-between gap-2 text-sm text-muted">
@@ -168,6 +149,25 @@ export function HistoryPage() {
           </div>
         )}
       </section>
+
+      <FilterPickerSheet
+        open={picker === 'wallet'}
+        title="Saring dompet"
+        allLabel="Semua dompet"
+        groups={[{ options: data.wallets }]}
+        selectedId={filter.walletId}
+        onSelect={(walletId) => changeFilter({ walletId })}
+        onClose={() => setPicker(null)}
+      />
+      <FilterPickerSheet
+        open={picker === 'category'}
+        title="Saring kategori"
+        allLabel="Semua kategori"
+        groups={categoryGroups}
+        selectedId={filter.categoryId}
+        onSelect={(categoryId) => changeFilter({ categoryId })}
+        onClose={() => setPicker(null)}
+      />
 
       {filtered.length === 0 ? (
         isFiltering ? (

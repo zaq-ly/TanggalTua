@@ -227,12 +227,24 @@ describe('Riwayat', () => {
     expect(screen.queryByRole('button', { name: /Kopi susu/ })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Hapus filter' }))
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Saring dompet' }), 'Tunai')
+    await user.click(screen.getByRole('button', { name: 'Saring dompet: Semua dompet' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Saring dompet' })).getByRole('radio', { name: /Tunai/ }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Saring dompet: Tunai' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Kopi susu/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Nasi padang/ })).not.toBeInTheDocument()
 
-    await user.selectOptions(screen.getByRole('combobox', { name: 'Saring kategori' }), 'Makanan')
+    await user.click(screen.getByRole('button', { name: 'Saring kategori: Semua kategori' }))
+    await user.click(within(screen.getByRole('dialog', { name: 'Saring kategori' })).getByRole('radio', { name: /Makanan/ }))
     expect(screen.getByText('Tidak ada transaksi yang cocok')).toBeInTheDocument()
+
+    // Memilih "Semua dompet" lagi melepas filter dompet saja.
+    await user.click(screen.getByRole('button', { name: 'Saring dompet: Tunai' }))
+    const walletSheet = screen.getByRole('dialog', { name: 'Saring dompet' })
+    expect(within(walletSheet).getByRole('radio', { name: /Tunai/ })).toHaveAttribute('aria-checked', 'true')
+    await user.click(within(walletSheet).getByRole('radio', { name: 'Semua dompet' }))
+    expect(screen.getByRole('button', { name: 'Saring kategori: Makanan' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Nasi padang/ })).toBeInTheDocument()
   })
 
   it('memuat transaksi bertahap', async () => {

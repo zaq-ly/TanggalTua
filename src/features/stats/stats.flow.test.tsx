@@ -76,12 +76,12 @@ describe('Statistik', () => {
   })
 
   it('ketuk kategori membuka Riwayat yang tersaring ke kategori itu', async () => {
-    const { makanan } = await seed()
+    await seed()
     const user = userEvent.setup()
     const router = renderAt('/statistik')
     await user.click(await screen.findByRole('link', { name: /^Makanan:/ }))
     expect(router.state.location.pathname).toBe('/riwayat')
-    expect(await screen.findByRole('combobox', { name: 'Saring kategori' })).toHaveValue(makanan)
+    expect(await screen.findByRole('button', { name: 'Saring kategori: Makanan' })).toBeInTheDocument()
     expect(await screen.findByRole('button', { name: /Pengeluaran Makanan, Rp100\.000/ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Kopi susu/ })).not.toBeInTheDocument()
   })
