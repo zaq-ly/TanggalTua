@@ -147,7 +147,7 @@ describe('kategori', () => {
 describe('onboarding', () => {
   it('menyimpan dompet berurutan beserta kategori bawaan', async () => {
     const database = freshDb()
-    await completeOnboarding([bca, tunai], database)
+    await completeOnboarding([bca, tunai], undefined, database)
     const wallets = await database.wallets.orderBy('sort').toArray()
     expect(wallets.map((w) => [w.name, w.startBalance, w.sort])).toEqual([
       ['MyBCA', 1_500_000, 0],
@@ -158,12 +158,38 @@ describe('onboarding', () => {
 
   it('tidak menyimpan apa pun bila satu dompet tidak valid', async () => {
     const database = freshDb()
-    await expect(completeOnboarding([bca, { ...tunai, name: 'MyBCA' }], database)).rejects.toThrow(/Sudah ada/)
+    await expect(completeOnboarding([bca, { ...tunai, name: 'MyBCA' }], undefined, database)).rejects.toThrow(/Sudah ada/)
     expect(await database.wallets.count()).toBe(0)
     expect(await database.categories.count()).toBe(0)
   })
 
   it('menolak daftar kosong', async () => {
-    await expect(completeOnboarding([], freshDb())).rejects.toThrow(/minimal satu/)
+    await expect(completeOnboarding([], undefined, freshDb())).rejects.toThrow(/minimal satu/)
+  })
+})
+
+describe('onboarding dengan anggaran', () => {
+  it('menyimpan total dana dan template 50/30/20 bulan itu', async () => {
+    const database = freshDb()
+    await completeOnboarding([bca], { month: '2026-11', totalFund: 2_000_000, template: '50-30-20' }, database)
+    const budget = await database.budgets.where('month').equals('2026-11').first()
+    expect(budget?.totalFund).toBe(2_000_000)
+    const pots = budget ? await database.budgetPots.where('budgetId').equals(budget.id).sortBy('sort') : []
+    expect(pots.map((p) => [p.name, p.amount])).toEqual([
+      ['Kebutuhan', 1_000_000],
+      ['Keinginan', 600_000],
+      ['Tabungan', 400_000],
+    ])
+  })
+
+  it('mulai kosong hanya menyimpan total dana; total 0 tidak membuat anggaran', async () => {
+    const database = freshDb()
+    await completeOnboarding([bca], { month: '2026-11', totalFund: 1_500_000, template: 'kosong' }, database)
+    expect(await database.budgetPots.count()).toBe(0)
+    expect((await database.budgets.toArray()).map((b) => b.totalFund)).toEqual([1_500_000])
+
+    const other = freshDb()
+    await completeOnboarding([bca], { month: '2026-11', totalFund: 0, template: '50-30-20' }, other)
+    expect(await other.budgets.count()).toBe(0)
   })
 })
