@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react'
 import { getSettings } from '../../db/db'
 import { setTheme } from '../../db/settings'
-import { readThemePreference, saveThemePreference, type ThemePreference } from '../../lib/theme'
+import { readThemePreference, type ThemePreference } from '../../lib/theme'
 
 const OPTIONS: readonly { value: ThemePreference; label: string; icon: LucideIcon }[] = [
   { value: 'system', label: 'Ikuti sistem', icon: Monitor },
@@ -19,8 +19,8 @@ export function ThemePicker() {
 
   function choose(value: ThemePreference) {
     setChosen(value)
-    // Diterapkan langsung, lalu disimpan ke database supaya ikut cadangan.
-    saveThemePreference(value)
+    // Hanya ditulis ke database; ThemeSync yang menerapkannya. Kalau di sini juga menulis
+    // localStorage, nilai lama dari database yang datang terlambat bisa membalikkan tema.
     void setTheme(value)
   }
 

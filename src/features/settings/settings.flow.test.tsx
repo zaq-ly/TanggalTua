@@ -42,13 +42,14 @@ describe('tema', () => {
     expect(within(group).getByRole('radio', { name: 'Ikuti sistem' })).toHaveAttribute('aria-checked', 'true')
 
     await user.click(within(group).getByRole('radio', { name: 'Gelap' }))
-    expect(document.documentElement).toHaveAttribute('data-theme', 'dark')
+    expect(within(group).getByRole('radio', { name: 'Gelap' })).toHaveAttribute('aria-checked', 'true')
+    await waitFor(() => expect(document.documentElement).toHaveAttribute('data-theme', 'dark'))
     expect(readThemePreference()).toBe('dark')
     await waitFor(async () => expect((await getSettings()).theme).toBe('dark'))
     expect(within(group).getByRole('radio', { name: 'Gelap' })).toHaveAttribute('aria-checked', 'true')
 
     await user.click(within(group).getByRole('radio', { name: 'Ikuti sistem' }))
-    expect(document.documentElement).not.toHaveAttribute('data-theme')
+    await waitFor(() => expect(document.documentElement).not.toHaveAttribute('data-theme'))
   })
 
   it('berganti tema cepat tidak membuat tema melompat balik ke pilihan sebelumnya', async () => {
@@ -56,8 +57,9 @@ describe('tema', () => {
     renderAt('/pengaturan')
     const group = await screen.findByRole('radiogroup', { name: 'Tampilan' })
     await user.click(within(group).getByRole('radio', { name: 'Gelap' }))
+    await waitFor(() => expect(document.documentElement).toHaveAttribute('data-theme', 'dark'))
 
-    // Catat setiap perubahan tema setelah pengguna memilih "Ikuti sistem".
+    // Setelah gelap berlaku, pilih "Ikuti sistem" dan catat setiap perubahan tema sesudahnya.
     const seen: (string | null)[] = []
     const observer = new MutationObserver(() => seen.push(document.documentElement.getAttribute('data-theme')))
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
