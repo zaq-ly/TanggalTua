@@ -30,6 +30,7 @@ function MonthTooltip({ active, payload }: TooltipContentProps) {
 }
 
 export function MonthlyBars({ data }: { data: readonly MonthTotals[] }) {
+  const isEmpty = data.every((row) => row.income === 0 && row.expense === 0)
   return (
     <div className="flex flex-col gap-3">
       <ul aria-label="Keterangan" className="flex gap-4 text-sm text-muted">
@@ -58,6 +59,8 @@ export function MonthlyBars({ data }: { data: readonly MonthTotals[] }) {
               axisLine={false}
               tick={{ fill: 'var(--muted)', fontSize: 11 }}
               allowDecimals={false}
+              // Tanpa data, Recharts membuat sumbu 0–4 yang terbaca "Rp1, Rp2, ..."; cukup tampilkan Rp0.
+              {...(isEmpty ? { ticks: [0], domain: [0, 1] } : {})}
             />
             <Tooltip content={MonthTooltip} cursor={{ fill: 'var(--surface-2)' }} />
             {SERIES.map((s) => (

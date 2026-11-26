@@ -13,6 +13,29 @@ interface SheetProps {
 // Lembar bisa bertumpuk (misalnya keypad di atas form). Escape hanya menutup yang paling atas.
 const openSheets: string[] = []
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])'
+
+/** Tab dan Shift+Tab berputar di dalam lembar, tidak lari ke halaman di belakangnya. */
+function trapFocus(event: KeyboardEvent, panel: HTMLElement | null): void {
+  if (!panel) return
+  const focusable = [...panel.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((el) => !el.closest('[inert]'))
+  const first = focusable[0]
+  const last = focusable.at(-1)
+  if (!first || !last) {
+    event.preventDefault()
+    return
+  }
+  const active = document.activeElement
+  if (event.shiftKey && (active === first || active === panel)) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && (active === last || !panel.contains(active))) {
+    event.preventDefault()
+    first.focus()
+  }
+}
+
 export function Sheet({ open, title, onClose, children, role = 'dialog' }: SheetProps) {
   const titleId = useId()
   const panelRef = useRef<HTMLDivElement>(null)
@@ -29,9 +52,12 @@ export function Sheet({ open, title, onClose, children, role = 'dialog' }: Sheet
     panelRef.current?.focus()
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape' && openSheets.at(-1) === titleId) {
+      if (openSheets.at(-1) !== titleId) return
+      if (event.key === 'Escape') {
         event.preventDefault()
         onCloseRef.current()
+      } else if (event.key === 'Tab') {
+        trapFocus(event, panelRef.current)
       }
     }
     document.addEventListener('keydown', onKeyDown)
