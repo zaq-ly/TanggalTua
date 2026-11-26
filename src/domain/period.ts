@@ -37,6 +37,11 @@ export function periodLabel(period: Period): string {
   return `${formatDate(period.start)} – ${formatDate(period.end)}`
 }
 
+/** Anggaran selalu per bulan (PRD F5); untuk rentang kustom dipakai bulan tanggal awalnya. */
+export function budgetMonth(period: Period): MonthString {
+  return period.kind === 'month' ? period.month : period.start.slice(0, 7)
+}
+
 export function inPeriod(tx: Transaction, range: DateRange): boolean {
   return isDateInRange(tx.date, range.start, range.end)
 }
