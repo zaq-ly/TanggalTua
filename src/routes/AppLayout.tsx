@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router'
 import { Snackbar } from '../components/Snackbar'
 import { TabBar } from '../components/TabBar'
+import { UpdatePrompt } from '../components/UpdatePrompt'
+import { ThemeSync } from '../features/settings/ThemeSync'
 import { TransactionSheet } from '../features/transactions/TransactionSheet'
 
 export function AppLayout() {
@@ -12,6 +14,8 @@ export function AppLayout() {
       <TabBar />
       <TransactionSheet />
       <Snackbar />
+      <UpdatePrompt />
+      <ThemeSync />
     </div>
   )
 }
