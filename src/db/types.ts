@@ -30,6 +30,7 @@ export interface Category {
   color: string
   archived: boolean
   sort: number
+  /** `key` pos anggaran (bukan id pos per bulan), lihat BudgetPot.key. Hanya untuk kategori pengeluaran. */
   budgetPotId?: string
 }
 
@@ -57,6 +58,8 @@ export interface Budget {
 export interface BudgetPot {
   id: string
   budgetId: string
+  /** Identitas tetap lintas bulan; pos hasil salin bulan lalu memakai key yang sama. Sejak skema v2. */
+  key: string
   name: string
   icon: string
   color: string

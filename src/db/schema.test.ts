@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest'
+import { Dexie } from 'dexie'
 import { getSettings } from './db'
 import { DEFAULT_SETTINGS, KeuanganDB, SCHEMA_VERSION } from './schema'
 import type { Transaction } from './types'
@@ -68,5 +69,38 @@ describe('skema Dexie', () => {
       .between('2026-11-01', '2026-11-30', true, true)
       .toArray()
     expect(inNovember.map((t) => t.id)).toEqual(['2', '3'])
+  })
+})
+
+describe('migrasi', () => {
+  it('v1 ke v2: pos lama mendapat key = id, kaitan kategori tetap, schemaVersion naik', async () => {
+    const name = `tes-migrasi-${crypto.randomUUID()}`
+    // Database versi 1 persis seperti yang dibuat Tahap 1–4.
+    const v1 = new Dexie(name)
+    v1.version(1).stores({
+      wallets: 'id, sort',
+      categories: 'id, kind, sort, budgetPotId',
+      transactions: 'id, date, type, categoryId, walletId, fromWalletId, toWalletId, createdAt',
+      budgets: 'id, &month',
+      budgetPots: 'id, budgetId, sort',
+      settings: 'id',
+    })
+    await v1.open()
+    await v1.table('settings').add({ id: 'main', theme: 'system', schemaVersion: 1, includeArchivedInTotal: false })
+    await v1.table('budgets').add({ id: 'b1', month: '2026-11', totalFund: 2_000_000 })
+    await v1.table('budgetPots').add({ id: 'p1', budgetId: 'b1', name: 'Kebutuhan', icon: 'house', color: 'teal', amount: 1_000_000, sort: 0 })
+    await v1
+      .table('categories')
+      .add({ id: 'c1', kind: 'expense', name: 'Makanan', icon: 'utensils', color: 'orange', archived: false, sort: 0, budgetPotId: 'p1' })
+    v1.close()
+
+    const v2 = new KeuanganDB(name)
+    openDbs.push(v2)
+    await v2.open()
+    expect(v2.verno).toBe(2)
+    expect(await v2.budgetPots.get('p1')).toMatchObject({ key: 'p1', amount: 1_000_000 })
+    expect(await v2.budgetPots.where('key').equals('p1').count()).toBe(1)
+    expect((await v2.categories.get('c1'))?.budgetPotId).toBe('p1')
+    expect((await getSettings(v2)).schemaVersion).toBe(2)
   })
 })
