@@ -3,13 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f1117" media="(prefers-color-scheme: dark)" />
-    <meta name="description" content="Pencatat keuangan pribadi, offline, tanpa akun." />
+    <!-- Nilai sama dengan --canvas di styles/index.css; disesuaikan lib/theme.ts bila tema dipilih manual. -->
+    <meta name="theme-color" content="#f5f6fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f1118" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="Pencatat keuangan pribadi: pemasukan, pengeluaran, transfer, dan anggaran. Offline, tanpa akun." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Keuangan" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>Keuangan Zaq</title>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>Keuangan Zaq butuh JavaScript. Aktifkan JavaScript di browser lalu muat ulang halaman.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
