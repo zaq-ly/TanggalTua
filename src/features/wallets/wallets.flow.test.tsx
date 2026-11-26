@@ -50,7 +50,7 @@ describe('onboarding', () => {
       ['GoPay', 0],
     ])
     expect(await db.categories.count()).toBe(16)
-    expect(await screen.findByText('Rp1.500.000')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /MyBCA, saldo Rp1\.500\.000/ })).toBeInTheDocument()
   })
 
   it('tidak bisa lanjut tanpa dompet', async () => {

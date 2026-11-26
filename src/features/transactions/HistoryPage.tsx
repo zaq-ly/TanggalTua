@@ -1,11 +1,15 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { ReceiptText, Search, SearchX } from 'lucide-react'
+import { CalendarX, ReceiptText, Search, SearchX } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { EmptyState } from '../../components/EmptyState'
 import { PageHeader } from '../../components/PageHeader'
+import { PeriodPicker } from '../../components/PeriodPicker'
+import { usePeriod } from '../../components/usePeriod'
 import { db } from '../../db/db'
 import { bySort } from '../../domain/ordering'
+import { inPeriod, periodRange } from '../../domain/period'
 import { byNewest, groupByDate, matchesFilter, type TransactionFilter } from '../../domain/transactions'
 import { relativeDayLabel } from '../../lib/date'
 import { formatRupiah } from '../../lib/money'
@@ -15,15 +19,22 @@ import { useAddSheet } from './useAddSheet'
 /** Jumlah transaksi per muatan (keputusan pemilik: muat bertahap, tanpa virtualisasi). */
 export const HISTORY_PAGE_SIZE = 100
 
-const EMPTY_FILTER: TransactionFilter = { query: '' }
-
 const selectClass =
   'min-h-11 w-full min-w-0 rounded-control border border-line bg-surface px-3 text-sm font-medium text-ink'
 
 export function HistoryPage() {
   const openEdit = useAddSheet((s) => s.openEdit)
-  const [filter, setFilter] = useState<TransactionFilter>(EMPTY_FILTER)
-  const [visibleCount, setVisibleCount] = useState(HISTORY_PAGE_SIZE)
+  const [params] = useSearchParams()
+  const period = usePeriod((s) => s.period)
+  const range = periodRange(period)
+  const rangeKey = `${range.start}/${range.end}`
+  // Filter dompet bisa datang dari kartu dompet di Beranda (?dompet=id).
+  const [filter, setFilter] = useState<TransactionFilter>(() => ({ query: '', walletId: params.get('dompet') ?? undefined }))
+  // Jumlah yang ditampilkan kembali ke satu muatan setiap periode berganti.
+  const [paging, setPaging] = useState({ key: rangeKey, count: HISTORY_PAGE_SIZE })
+  const visibleCount = paging.key === rangeKey ? paging.count : HISTORY_PAGE_SIZE
+  const setVisibleCount = (update: (n: number) => number) =>
+    setPaging((p) => ({ key: rangeKey, count: update(p.key === rangeKey ? p.count : HISTORY_PAGE_SIZE) }))
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   const data = useLiveQuery(async () => {
@@ -43,7 +54,8 @@ export function HistoryPage() {
     wallets: new Map(data.wallets.map((w) => [w.id, w])),
     categories: new Map(data.categories.map((c) => [c.id, c])),
   }
-  const filtered = data && ctx ? data.transactions.filter((tx) => matchesFilter(tx, filter, ctx)) : []
+  const filtered =
+    data && ctx ? data.transactions.filter((tx) => inPeriod(tx, range) && matchesFilter(tx, filter, ctx)) : []
   const hasMore = filtered.length > visibleCount
   const groups = groupByDate(filtered.slice(0, visibleCount))
   const isFiltering = filter.query.trim() !== '' || filter.walletId !== undefined || filter.categoryId !== undefined
@@ -53,17 +65,18 @@ export function HistoryPage() {
     if (!hasMore || !sentinel || typeof IntersectionObserver === 'undefined') return
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) setVisibleCount((n) => n + HISTORY_PAGE_SIZE)
+        if (!entries.some((e) => e.isIntersecting)) return
+        setPaging((p) => ({ key: rangeKey, count: (p.key === rangeKey ? p.count : HISTORY_PAGE_SIZE) + HISTORY_PAGE_SIZE }))
       },
       { rootMargin: '600px 0px' },
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasMore, visibleCount])
+  }, [hasMore, visibleCount, rangeKey])
 
   function changeFilter(patch: Partial<TransactionFilter>) {
     setFilter((f) => ({ ...f, ...patch }))
-    setVisibleCount(HISTORY_PAGE_SIZE)
+    setVisibleCount(() => HISTORY_PAGE_SIZE)
   }
 
   if (!data || !ctx) return <PageHeader title="Riwayat" />
@@ -89,6 +102,7 @@ export function HistoryPage() {
       <PageHeader title="Riwayat" />
 
       <section aria-label="Cari dan saring" className="flex flex-col gap-2">
+        <PeriodPicker />
         <label className="relative block">
           <span className="sr-only">Cari catatan atau kategori</span>
           <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted" />
@@ -152,11 +166,19 @@ export function HistoryPage() {
       </section>
 
       {filtered.length === 0 ? (
-        <EmptyState
-          icon={SearchX}
-          title="Tidak ada transaksi yang cocok"
-          description="Coba kata lain, atau hapus filter dompet dan kategori."
-        />
+        isFiltering ? (
+          <EmptyState
+            icon={SearchX}
+            title="Tidak ada transaksi yang cocok"
+            description="Coba kata lain, ganti periode, atau hapus filter dompet dan kategori."
+          />
+        ) : (
+          <EmptyState
+            icon={CalendarX}
+            title="Tidak ada transaksi di periode ini"
+            description="Ganti periode di atas, atau ketuk tombol + untuk mencatat transaksi baru."
+          />
+        )
       ) : (
         <div className="flex flex-col gap-4">
           {groups.map((group) => (

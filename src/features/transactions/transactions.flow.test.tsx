@@ -8,6 +8,8 @@ import { addTransaction } from '../../db/transactions'
 import { todayDateString } from '../../lib/date'
 import { routes } from '../../routes/routes'
 import { useAddSheet } from './useAddSheet'
+import { usePeriod } from '../../components/usePeriod'
+import { monthPeriod } from '../../domain/period'
 import { HISTORY_PAGE_SIZE } from './HistoryPage'
 
 function renderAt(path: string) {
@@ -40,6 +42,8 @@ async function pressKeys(scope: HTMLElement, keys: string[]) {
 
 beforeEach(() => {
   useAddSheet.getState().close()
+  // Data contoh memakai November 2026; periode dikunci supaya tes tidak bergantung pada tanggal hari ini.
+  usePeriod.setState({ period: monthPeriod('2026-11') })
 })
 
 afterEach(async () => {
