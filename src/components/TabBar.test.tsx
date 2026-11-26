@@ -24,8 +24,9 @@ describe('TabBar', () => {
     const user = userEvent.setup()
     const router = renderAt('/')
     await user.click(screen.getByRole('link', { name: 'Statistik' }))
+    // Statistik dimuat lazy, jadi tunggu sampai halamannya tampil.
+    expect(await screen.findByRole('heading', { level: 1, name: 'Statistik' }, { timeout: 5_000 })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/statistik')
-    expect(screen.getByRole('heading', { level: 1, name: 'Statistik' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Statistik' })).toHaveAttribute('aria-current', 'page')
     expect(screen.getByRole('link', { name: 'Beranda' })).not.toHaveAttribute('aria-current')
   })

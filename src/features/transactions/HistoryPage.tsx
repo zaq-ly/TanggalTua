@@ -28,8 +28,12 @@ export function HistoryPage() {
   const period = usePeriod((s) => s.period)
   const range = periodRange(period)
   const rangeKey = `${range.start}/${range.end}`
-  // Filter dompet bisa datang dari kartu dompet di Beranda (?dompet=id).
-  const [filter, setFilter] = useState<TransactionFilter>(() => ({ query: '', walletId: params.get('dompet') ?? undefined }))
+  // Filter bisa datang dari kartu dompet di Beranda (?dompet=id) atau dari Statistik (?kategori=id).
+  const [filter, setFilter] = useState<TransactionFilter>(() => ({
+    query: '',
+    walletId: params.get('dompet') ?? undefined,
+    categoryId: params.get('kategori') ?? undefined,
+  }))
   // Jumlah yang ditampilkan kembali ke satu muatan setiap periode berganti.
   const [paging, setPaging] = useState({ key: rangeKey, count: HISTORY_PAGE_SIZE })
   const visibleCount = paging.key === rangeKey ? paging.count : HISTORY_PAGE_SIZE

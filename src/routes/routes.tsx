@@ -5,7 +5,6 @@ import { CategoriesPage } from '../features/categories/CategoriesPage'
 import { CategoryFormPage } from '../features/categories/CategoryFormPage'
 import { HomePage } from '../features/home/HomePage'
 import { SettingsPage } from '../features/settings/SettingsPage'
-import { StatsPage } from '../features/stats/StatsPage'
 import { HistoryPage } from '../features/transactions/HistoryPage'
 import { OnboardingPage } from '../features/wallets/OnboardingPage'
 import { WalletFormPage } from '../features/wallets/WalletFormPage'
@@ -24,7 +23,11 @@ export const routes: RouteObject[] = [
       { path: 'anggaran', element: <BudgetPage /> },
       { path: 'anggaran/pos/baru', element: <PotFormPage /> },
       { path: 'anggaran/pos/:id', element: <PotFormPage /> },
-      { path: 'statistik', element: <StatsPage /> },
+      {
+        path: 'statistik',
+        // Dimuat terpisah supaya Recharts tidak memperlambat pembukaan pertama di Beranda.
+        lazy: async () => ({ Component: (await import('../features/stats/StatsPage')).StatsPage }),
+      },
       { path: 'pengaturan', element: <SettingsPage /> },
       { path: 'pengaturan/dompet', element: <WalletsPage /> },
       { path: 'pengaturan/dompet/baru', element: <WalletFormPage /> },

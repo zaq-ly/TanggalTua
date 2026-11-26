@@ -37,6 +37,16 @@
   --swatch-sky: light-dark(#0284c7, #7dd3fc);
   --swatch-blue: light-dark(#2563eb, #93c5fd);
   --swatch-slate: light-dark(#475569, #cbd5e1);
+
+  /*
+   * Warna grafik pemasukan vs pengeluaran. Bukan hijau/merah karena pasangan itu gagal
+   * dibedakan penderita buta warna (deutan ΔE 4,9); biru/oranye lolos validator dataviz
+   * di kedua tema. Teks angka tetap memakai --income/--expense.
+   */
+  --chart-income: light-dark(#2563eb, #3b82f6);
+  --chart-expense: #ea580c;
+  /* Potongan gabungan "Kategori lain": abu netral, di luar palet kategori. */
+  --chart-other: light-dark(#a3a9b8, #5b6275);
 }
 
 @media (prefers-color-scheme: dark) {
