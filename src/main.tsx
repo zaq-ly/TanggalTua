@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider, createBrowserRouter } from 'react-router'
 import { routes } from './routes/routes'
+import { requestPersistentStorage } from './lib/storage'
 import { applyThemePreference, readThemePreference } from './lib/theme'
 import './styles/index.css'
 
@@ -16,3 +17,6 @@ createRoot(rootElement).render(
     <RouterProvider router={router} />
   </StrictMode>,
 )
+
+// Tidak ditunggu: aplikasi tetap jalan walau browser menolak; statusnya tampil di Pengaturan.
+void requestPersistentStorage().catch(() => 'unsupported')
