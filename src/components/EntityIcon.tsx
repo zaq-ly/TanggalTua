@@ -5,10 +5,12 @@ import { getIcon } from './iconRegistry'
 interface EntityIconProps {
   icon: string
   color: string
-  size?: 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
 }
 
 const SIZES = {
+  xs: { box: 'size-6', glyph: 'size-3.5' },
+  sm: { box: 'size-9', glyph: 'size-4.5' },
   md: { box: 'size-10', glyph: 'size-5' },
   lg: { box: 'size-14', glyph: 'size-7' },
 } as const

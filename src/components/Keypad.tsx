@@ -14,7 +14,7 @@ interface KeypadProps {
 const KEYS: readonly KeypadKey[] = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '000', '0']
 
 const keyClass =
-  'flex min-h-14 items-center justify-center rounded-control bg-surface-2 text-2xl font-medium tabular-nums transition active:scale-95 active:bg-line'
+  'flex min-h-12 items-center justify-center rounded-control bg-surface-2 text-2xl font-medium tabular-nums transition active:scale-95 active:bg-line'
 
 export function Keypad({ value, onChange, max = MAX_RUPIAH, quickAmounts = [] }: KeypadProps) {
   return (
