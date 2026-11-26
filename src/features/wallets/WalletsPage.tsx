@@ -29,7 +29,6 @@ export function WalletsPage() {
       <PageHeader
         title="Dompet"
         backTo="/pengaturan"
-        backLabel="Kembali ke Pengaturan"
         action={<IconButtonLink to="/pengaturan/dompet/baru" label="Tambah dompet" icon={Plus} />}
       />
       {wallets?.length === 0 && (

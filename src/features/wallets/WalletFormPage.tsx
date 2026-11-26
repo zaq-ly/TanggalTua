@@ -1,13 +1,14 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { AmountSheet } from '../../components/AmountSheet'
 import { Button } from '../../components/Button'
 import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { EmptyState } from '../../components/EmptyState'
 import { EntityFields, type EntityDraft } from '../../components/EntityFields'
 import { PageHeader } from '../../components/PageHeader'
+import { useGoBack } from '../../components/useGoBack'
 import { db } from '../../db/db'
 import { messageOf } from '../../db/errors'
 import type { Wallet } from '../../db/types'
@@ -26,7 +27,7 @@ export function WalletFormPage() {
   if (id && wallet === null) {
     return (
       <>
-        <PageHeader title="Dompet" backTo={LIST_PATH} backLabel="Kembali ke daftar dompet" />
+        <PageHeader title="Dompet" backTo={LIST_PATH} />
         <EmptyState icon={SearchX} title="Dompet tidak ditemukan" description="Mungkin sudah dihapus. Kembali ke daftar dompet." />
       </>
     )
@@ -35,7 +36,7 @@ export function WalletFormPage() {
 }
 
 function WalletForm({ wallet }: { wallet: Wallet | null }) {
-  const navigate = useNavigate()
+  const goBack = useGoBack(LIST_PATH)
   const [draft, setDraft] = useState<EntityDraft>({
     name: wallet?.name ?? '',
     icon: wallet?.icon ?? 'wallet',
@@ -53,7 +54,7 @@ function WalletForm({ wallet }: { wallet: Wallet | null }) {
     setError(null)
     try {
       await action()
-      navigate(LIST_PATH)
+      goBack()
     } catch (e) {
       setError(messageOf(e))
     } finally {
@@ -68,7 +69,7 @@ function WalletForm({ wallet }: { wallet: Wallet | null }) {
 
   return (
     <>
-      <PageHeader title={wallet ? 'Ubah dompet' : 'Dompet baru'} backTo={LIST_PATH} backLabel="Kembali ke daftar dompet" />
+      <PageHeader title={wallet ? 'Ubah dompet' : 'Dompet baru'} backTo={LIST_PATH} />
       <form
         className="flex flex-col gap-5"
         onSubmit={(e) => {
@@ -143,7 +144,7 @@ function WalletForm({ wallet }: { wallet: Wallet | null }) {
           onClose={() => setConfirmDelete(false)}
           onConfirm={async () => {
             await deleteWallet(wallet.id)
-            navigate(LIST_PATH)
+            goBack()
           }}
         />
       )}

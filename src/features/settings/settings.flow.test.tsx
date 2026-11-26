@@ -51,6 +51,27 @@ describe('tema', () => {
     expect(document.documentElement).not.toHaveAttribute('data-theme')
   })
 
+  it('berganti tema cepat tidak membuat tema melompat balik ke pilihan sebelumnya', async () => {
+    const user = userEvent.setup()
+    renderAt('/pengaturan')
+    const group = await screen.findByRole('radiogroup', { name: 'Tampilan' })
+    await user.click(within(group).getByRole('radio', { name: 'Gelap' }))
+
+    // Catat setiap perubahan tema setelah pengguna memilih "Ikuti sistem".
+    const seen: (string | null)[] = []
+    const observer = new MutationObserver(() => seen.push(document.documentElement.getAttribute('data-theme')))
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    await user.click(within(group).getByRole('radio', { name: 'Ikuti sistem' }))
+
+    await waitFor(async () => expect((await getSettings()).theme).toBe('system'))
+    await waitFor(() => expect(document.documentElement).not.toHaveAttribute('data-theme'))
+    await new Promise((r) => setTimeout(r, 50))
+    observer.disconnect()
+    expect(seen).not.toContain('dark')
+    expect(document.documentElement).not.toHaveAttribute('data-theme')
+    expect(readThemePreference()).toBe('system')
+  })
+
   it('tema dari database (misalnya hasil impor) langsung diterapkan', async () => {
     await setTheme('light')
     renderAt('/')

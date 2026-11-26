@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Check, ChevronRight, SearchX } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router'
+import { useParams, useSearchParams } from 'react-router'
 import { AmountSheet } from '../../components/AmountSheet'
 import { Button } from '../../components/Button'
 import { ConfirmSheet } from '../../components/ConfirmSheet'
@@ -9,6 +9,7 @@ import { EmptyState } from '../../components/EmptyState'
 import { EntityFields, type EntityDraft } from '../../components/EntityFields'
 import { EntityIcon } from '../../components/EntityIcon'
 import { PageHeader } from '../../components/PageHeader'
+import { useGoBack } from '../../components/useGoBack'
 import { deletePot, savePot } from '../../db/budgets'
 import { db } from '../../db/db'
 import { messageOf } from '../../db/errors'
@@ -39,7 +40,7 @@ export function PotFormPage() {
   if (id && !data.pot) {
     return (
       <>
-        <PageHeader title="Pos" backTo={BACK} backLabel="Kembali ke Anggaran" />
+        <PageHeader title="Pos" backTo={BACK} />
         <EmptyState icon={SearchX} title="Pos tidak ditemukan" description="Mungkin sudah dihapus. Kembali ke Anggaran." />
       </>
     )
@@ -57,7 +58,7 @@ interface PotFormProps {
 }
 
 function PotForm({ month, pot, budget, categories, allPots }: PotFormProps) {
-  const navigate = useNavigate()
+  const goBack = useGoBack(BACK)
   const totalFund = budget?.totalFund ?? 0
   const [draft, setDraft] = useState<EntityDraft>({
     name: pot?.name ?? '',
@@ -88,7 +89,7 @@ function PotForm({ month, pot, budget, categories, allPots }: PotFormProps) {
     setError(null)
     try {
       await savePot({ month, id: pot?.id, input: { ...draft, amount }, categoryIds: selected, manualUsed })
-      navigate(BACK)
+      goBack()
     } catch (e) {
       setError(messageOf(e))
       setBusy(false)
@@ -97,7 +98,7 @@ function PotForm({ month, pot, budget, categories, allPots }: PotFormProps) {
 
   return (
     <>
-      <PageHeader title={pot ? 'Ubah pos' : 'Pos baru'} backTo={BACK} backLabel="Kembali ke Anggaran" />
+      <PageHeader title={pot ? 'Ubah pos' : 'Pos baru'} backTo={BACK} />
       <p className="-mt-2 text-sm text-muted">Anggaran {formatMonth(month)}</p>
 
       <form
@@ -267,7 +268,7 @@ function PotForm({ month, pot, budget, categories, allPots }: PotFormProps) {
           onClose={() => setSheet(null)}
           onConfirm={async () => {
             await deletePot(pot.id)
-            navigate(BACK)
+            goBack()
           }}
         />
       )}

@@ -21,7 +21,7 @@ const LINKS: readonly SettingsLink[] = [
 export function SettingsPage() {
   return (
     <>
-      <PageHeader title="Pengaturan" backTo="/" backLabel="Kembali ke Beranda" />
+      <PageHeader title="Pengaturan" backTo="/" />
       <ul className="divide-y divide-line overflow-hidden rounded-card bg-surface">
         {LINKS.map(({ to, label, description, icon: Icon }) => (
           <li key={to}>

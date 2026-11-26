@@ -1,12 +1,13 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { SearchX } from 'lucide-react'
 import { useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router'
+import { useParams, useSearchParams } from 'react-router'
 import { Button } from '../../components/Button'
 import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { EmptyState } from '../../components/EmptyState'
 import { EntityFields, type EntityDraft } from '../../components/EntityFields'
 import { PageHeader } from '../../components/PageHeader'
+import { useGoBack } from '../../components/useGoBack'
 import {
   createCategory,
   deleteCategory,
@@ -28,7 +29,7 @@ export function CategoryFormPage() {
   if (id && category === null) {
     return (
       <>
-        <PageHeader title="Kategori" backTo={categoriesPath('expense')} backLabel="Kembali ke daftar kategori" />
+        <PageHeader title="Kategori" backTo={categoriesPath('expense')} />
         <EmptyState icon={SearchX} title="Kategori tidak ditemukan" description="Mungkin sudah dihapus. Kembali ke daftar kategori." />
       </>
     )
@@ -38,8 +39,8 @@ export function CategoryFormPage() {
 }
 
 function CategoryForm({ category, kind }: { category: Category | null; kind: CategoryKind }) {
-  const navigate = useNavigate()
   const listPath = categoriesPath(kind)
+  const goBack = useGoBack(listPath)
   const [draft, setDraft] = useState<EntityDraft>({
     name: category?.name ?? '',
     icon: category?.icon ?? 'tag',
@@ -55,7 +56,7 @@ function CategoryForm({ category, kind }: { category: Category | null; kind: Cat
     setError(null)
     try {
       await action()
-      navigate(listPath)
+      goBack()
     } catch (e) {
       setError(messageOf(e))
     } finally {
@@ -68,7 +69,6 @@ function CategoryForm({ category, kind }: { category: Category | null; kind: Cat
       <PageHeader
         title={category ? 'Ubah kategori' : kind === 'income' ? 'Pemasukan baru' : 'Pengeluaran baru'}
         backTo={listPath}
-        backLabel="Kembali ke daftar kategori"
       />
       <form
         className="flex flex-col gap-5"
@@ -126,7 +126,7 @@ function CategoryForm({ category, kind }: { category: Category | null; kind: Cat
           onClose={() => setConfirmDelete(false)}
           onConfirm={async () => {
             await deleteCategory(category.id)
-            navigate(listPath)
+            goBack()
           }}
         />
       )}

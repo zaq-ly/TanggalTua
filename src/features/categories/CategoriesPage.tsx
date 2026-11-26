@@ -28,7 +28,6 @@ export function CategoriesPage() {
       <PageHeader
         title="Kategori"
         backTo="/pengaturan"
-        backLabel="Kembali ke Pengaturan"
         action={<IconButtonLink to={newCategoryPath(kind)} label={`Tambah kategori ${KIND_LABELS[kind].toLowerCase()}`} icon={Plus} />}
       />
 
